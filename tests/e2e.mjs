@@ -26,6 +26,20 @@ const SHOT_DIR = path.join(os.tmpdir(), 'llmt-e2e-shots');
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+async function gotoExtensionPage(page, url) {
+  // 扩展安装时会自动打开设置页，可能和测试的导航竞争同一标签页
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      await page.goto(url, { waitUntil: 'load' });
+      return;
+    } catch (err) {
+      const interrupted = /interrupted by another navigation/i.test(err?.message || '');
+      if (!interrupted || attempt === 2) throw err;
+      await sleep(800);
+    }
+  }
+}
+
 /* --------------------------------- 测试服务 -------------------------------- */
 
 function listen(server) {
@@ -181,6 +195,12 @@ try {
   const extensionId = new URL(sw.url()).host;
   ok('扩展加载', `id=${extensionId}`);
 
+  // 等安装流程（自动打开设置页）落定，避免测试导航被抢
+  await sleep(800);
+  for (const page of context.pages()) {
+    if (page.url().includes('/src/options/options.html')) await page.close().catch(() => {});
+  }
+
   async function evalSw(fn, arg) {
     let lastError;
     for (let attempt = 0; attempt < 4; attempt += 1) {
@@ -196,7 +216,7 @@ try {
 
   /* 1. 设置页保存配置 */
   const options = await context.newPage();
-  await options.goto(`chrome-extension://${extensionId}/src/options/options.html`);
+  await gotoExtensionPage(options, `chrome-extension://${extensionId}/src/options/options.html`);
   await options.fill('#endpoint', mock.url);
   await options.fill('#apiKey', 'test-key');
   await options.fill('#model', 'mock-model');
@@ -225,7 +245,7 @@ try {
   assert.ok(tabId, '未找到文章标签页');
 
   const popup = await context.newPage();
-  await popup.goto(`chrome-extension://${extensionId}/src/popup/popup.html`);
+  await gotoExtensionPage(popup, `chrome-extension://${extensionId}/src/popup/popup.html`);
   await popup.waitForFunction(
     () => (document.getElementById('config-text')?.textContent || '').includes('mock-model'),
     { timeout: 6000 }
