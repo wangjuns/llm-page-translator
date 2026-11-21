@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LLM 网页翻译</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="head">
+      <img src="../../icons/icon48.png" class="logo" width="36" height="36" alt="" />
+      <div class="brand">
+        <div class="name">LLM 网页翻译</div>
+        <div class="ver" id="version">正文整页翻译</div>
+      </div>
+      <button id="settings" class="icon-btn" title="设置" aria-label="设置">⚙</button>
+    </header>
+
+    <div id="config-line" class="config">
+      <span class="dot"></span>
+      <span class="config-text" id="config-text">读取配置…</span>
+    </div>
+
+    <button id="translate" class="primary">翻译当前页面</button>
+
+    <div class="row">
+      <div class="seg" role="group" aria-label="显示模式">
+        <button type="button" data-mode="bilingual" class="active">双语对照</button>
+        <button type="button" data-mode="reader">仅译文</button>
+      </div>
+      <button id="clear" class="ghost" title="移除页面上的译文">还原</button>
+    </div>
+
+    <p class="hint">
+      快捷键 <kbd>Alt</kbd>+<kbd>T</kbd> 翻译 / 还原。译文缓存在本地，刷新后自动恢复。
+    </p>
+
+    <div id="msg" class="msg" hidden></div>
+
+    <footer class="foot">
+      <span id="cache-info">缓存：—</span>
+      <button id="clear-cache" class="link">清空缓存</button>
+    </footer>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

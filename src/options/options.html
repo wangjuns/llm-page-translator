@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LLM 网页翻译 · 设置</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="top">
+        <img src="../../icons/icon128.png" width="44" height="44" alt="" class="logo" />
+        <div class="titles">
+          <h1>LLM 网页翻译 · 设置</h1>
+          <p>提取网页正文，一次性整页翻译。配置通过 Chrome 同步，译文本地缓存。</p>
+        </div>
+        <span id="sync-badge" class="badge">同步状态读取中…</span>
+      </header>
+
+      <section class="card">
+        <h2>模型服务 <span class="tag">OpenAI 兼容</span></h2>
+        <label class="field">
+          <span class="label">Endpoint</span>
+          <input id="endpoint" type="url" spellcheck="false" placeholder="https://api.openai.com/v1" />
+          <small>填到 <code>/v1</code> 即可，扩展自动补 <code>/chat/completions</code>。支持 OpenAI、DeepSeek、OpenRouter、Ollama、vLLM、LM Studio 等兼容接口。</small>
+        </label>
+
+        <div class="field">
+          <span class="label">API Key</span>
+          <div class="inline">
+            <input id="apiKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-…（本地模型可留空）" />
+            <button id="toggleKey" type="button" class="mini">显示</button>
+          </div>
+          <small id="key-hint">默认随 Chrome 同步（Chrome 同步数据在服务端加密，建议开启同步密码短语）。</small>
+        </div>
+
+        <label class="field">
+          <span class="label">模型 ID</span>
+          <input id="model" type="text" list="model-list" spellcheck="false" placeholder="gpt-4o-mini / deepseek-chat / qwen-plus …" />
+          <datalist id="model-list">
+            <option value="gpt-4o-mini"></option>
+            <option value="gpt-4.1-mini"></option>
+            <option value="gpt-4.1"></option>
+            <option value="deepseek-chat"></option>
+            <option value="qwen-plus"></option>
+            <option value="glm-4-plus"></option>
+            <option value="openai/gpt-4o-mini"></option>
+            <option value="anthropic/claude-3.5-sonnet"></option>
+            <option value="llama3.1:8b"></option>
+          </datalist>
+        </label>
+
+        <div class="grid grid-2">
+          <label class="field">
+            <span class="label">额外请求头（JSON）</span>
+            <textarea id="extraHeaders" rows="2" spellcheck="false" placeholder='{"HTTP-Referer": "https://example.com"}'></textarea>
+          </label>
+          <label class="field">
+            <span class="label">额外请求参数（JSON）</span>
+            <textarea id="extraBody" rows="2" spellcheck="false" placeholder='{"top_p": 0.9}'></textarea>
+          </label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>翻译</h2>
+        <div class="grid grid-3">
+          <label class="field">
+            <span class="label">目标语言</span>
+            <select id="targetLang"></select>
+          </label>
+          <label class="field">
+            <span class="label">源语言</span>
+            <input id="sourceLang" type="text" spellcheck="false" placeholder="自动检测" />
+          </label>
+          <label class="field">
+            <span class="label">温度</span>
+            <input id="temperature" type="number" min="0" max="2" step="0.1" />
+          </label>
+        </div>
+
+        <label class="field" id="custom-lang-field" hidden>
+          <span class="label">自定义目标语言</span>
+          <input id="customLang" type="text" placeholder="例如：粤语、文言文" />
+        </label>
+
+        <div class="grid grid-3">
+          <label class="field">
+            <span class="label">最大输出 tokens</span>
+            <input id="maxTokens" type="number" min="0" max="200000" step="128" />
+          </label>
+          <label class="field">
+            <span class="label">每次请求字符上限</span>
+            <input id="batchChars" type="number" min="200" max="12000" step="100" />
+          </label>
+          <label class="field">
+            <span class="label">并发请求数</span>
+            <input id="concurrency" type="number" min="1" max="6" step="1" />
+          </label>
+          <label class="field">
+            <span class="label">超时（毫秒）</span>
+            <input id="timeoutMs" type="number" min="5000" max="600000" step="1000" />
+          </label>
+        </div>
+
+        <label class="field">
+          <span class="label">自定义 System Prompt（可选）</span>
+          <textarea id="systemPrompt" rows="3" spellcheck="false" placeholder="留空使用内置提示词。可用占位符 {target}、{source}。"></textarea>
+          <small>内置提示词要求模型输出严格 JSON，并保证译文与原文段落一一对应。</small>
+        </label>
+      </section>
+
+      <section class="card">
+        <h2>显示与恢复</h2>
+        <div class="grid grid-2">
+          <label class="field">
+            <span class="label">默认显示模式</span>
+            <select id="displayMode">
+              <option value="bilingual">双语对照（译文插在原文下方）</option>
+              <option value="reader">仅译文（沉浸式阅读器）</option>
+            </select>
+          </label>
+        </div>
+        <label class="check">
+          <input id="autoRestore" type="checkbox" />
+          <span>刷新后自动恢复已缓存的译文</span>
+        </label>
+        <p class="note">关闭后，刷新页面需要再点一次翻译；命中缓存时不会重新请求模型。</p>
+      </section>
+
+      <section class="card">
+        <h2>同步与隐私</h2>
+        <label class="check">
+          <input id="storeKeyLocally" type="checkbox" />
+          <span>API Key 仅保存在本机（不随 Chrome 同步）</span>
+        </label>
+        <p class="note">
+          配置（endpoint、模型、语言、提示词等）保存在 <code>chrome.storage.sync</code>，登录同一 Chrome 账号的设备自动同步；
+          译文与页面缓存保存在 <code>chrome.storage.local</code>，不会上传。翻译时正文会发送到你配置的 LLM 服务。
+        </p>
+        <p class="note" id="sync-usage"></p>
+      </section>
+
+      <div id="status" class="status" hidden></div>
+
+      <footer class="bar">
+        <div class="bar-left">
+          <button id="save" class="primary" type="button">保存设置</button>
+          <button id="test" class="secondary" type="button">测试连接</button>
+          <button id="reset-params" class="ghost" type="button">恢复默认参数</button>
+        </div>
+        <div class="bar-right">
+          <button id="clear-cache" class="ghost danger" type="button">清空本地缓存</button>
+        </div>
+      </footer>
+
+      <p class="foot-note">快捷键 <kbd>Alt</kbd>+<kbd>T</kbd> 翻译 / 还原当前页面 · 右键菜单同样可用</p>
+    </div>
+
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

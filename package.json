@@ -1,0 +1,15 @@
+{
+  "name": "llm-page-translator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chrome 扩展：提取网页正文，调用任意 OpenAI 兼容 LLM 一次性整页翻译；配置随 Chrome 同步，译文本地缓存。",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/unit.test.mjs",
+    "test:e2e": "node tests/e2e.mjs",
+    "check": "node scripts/syntax-check.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.65.1"
+  }
+}
