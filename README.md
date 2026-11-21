@@ -29,6 +29,7 @@
 4. 建议把扩展固定到工具栏；首次安装会自动打开设置页。
 
 > 仅支持 Chrome / Edge 等 Chromium 内核浏览器，`manifest_version: 3`，最低 Chrome 116。
+> 需要翻译本地 HTML 文件时，在扩展详情页打开「允许访问文件网址」。
 
 ## 配置
 
@@ -140,7 +141,7 @@ npm run test:e2e  # 端到端测试
 node tests/screenshots.mjs   # 重新生成 docs/screenshots
 ```
 
-端到端测试会启动真实 Chromium（加载本扩展）、本地静态文章页和假 LLM 服务，覆盖 17 项断言：设置保存、注入翻译、正文过滤、请求头 / 模型 / 目标语言、刷新自动恢复（零新增请求）、阅读器、错误 endpoint 报错、Key 本机分流、清空缓存后不再恢复。
+端到端测试会启动真实 Chromium（加载本扩展）、本地静态文章页和假 LLM 服务，覆盖 18 项断言：设置保存、注入翻译、正文过滤、请求头 / 模型 / 目标语言、刷新自动恢复（零新增请求）、阅读器、错误 endpoint 报错、Key 本机分流、清空缓存后不再恢复。
 
 Playwright 需要可加载扩展的 Chromium：
 

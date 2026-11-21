@@ -352,6 +352,22 @@ try {
   assert.equal(restoredReaderItems, status.total);
   ok('刷新后按阅读器模式自动恢复');
 
+  await article.locator('#llmt-host .modebtn').click();
+  await article.waitForFunction(
+    () => {
+      const root = document.getElementById('llmt-host')?.shadowRoot;
+      const reader = root?.querySelector('.reader');
+      return Boolean(reader?.hidden);
+    },
+    { timeout: 5000 }
+  );
+  await article.waitForFunction(
+    (total) => document.querySelectorAll('.llmt-tr').length === total,
+    status.total,
+    { timeout: 5000 }
+  );
+  ok('阅读器内「双语」按钮切回行内模式');
+
   /* 7. 错误 endpoint 的友好报错 */
   await options.bringToFront();
   await options.fill('#endpoint', `http://127.0.0.1:${mock.port}/nope`);
