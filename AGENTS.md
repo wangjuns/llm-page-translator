@@ -11,6 +11,7 @@ npm test          # 单元测试（node:test，纯 Node，无需浏览器）
 npm run check     # 语法 + JSON 校验（scripts/syntax-check.mjs）
 npm run test:e2e  # Playwright + 真实 Chromium + 假 LLM 端到端（需 CHROMIUM_PATH 或已装 chromium）
 node tests/screenshots.mjs   # 重新生成 docs/screenshots（改 UI 后跑）
+node scripts/package.mjs     # 本地打发布 zip（dist/，只含运行所需文件）
 ```
 
 ## 目录 / 数据流
@@ -21,6 +22,12 @@ node tests/screenshots.mjs   # 重新生成 docs/screenshots（改 UI 后跑）
 - `src/content/extract.js` → `render.js` → `main.js`：按此顺序注入，每个文件都是 IIFE + `window.__llmtXxx` 全局 + 幂等 guard，重复注入安全。
 - `src/shared/config.js`：配置默认值唯一来源（`DEFAULT_CONFIG`），service worker / popup / options 共用。
 - UI 全部中文；样式：行内译文用 `chrome.scripting.insertCSS` 注入（绕过页面 CSP），状态条/阅读器在 shadow DOM 内用 `adoptedStyleSheets`。
+
+## 发布
+
+- 版本号唯一来源是 `manifest.json` 的 `version`；发布 = commit → `git tag v<version>` → `git push origin v<version>`。
+- Release 工作流会先跑 `npm run check` + `npm test`，再 `node scripts/package.mjs --expect-version="$GITHUB_REF_NAME"`，tag 与 manifest 不一致直接失败。
+- zip 根目录必须是 `manifest.json`（`scripts/package.mjs` 会校验），否则用户无法「加载已解压」。
 
 ## 硬约束 / 坑
 

@@ -1,5 +1,7 @@
 # LLM 网页翻译（Chrome 扩展）
 
+![CI](https://github.com/wangjuns/llm-page-translator/actions/workflows/ci.yml/badge.svg)
+
 提取网页正文，调用**任意 OpenAI 兼容 LLM** 一次性整页翻译。配置随 Chrome 账号同步，译文缓存在本地，刷新后自动恢复。
 
 ![双语对照模式](docs/screenshots/bilingual.png)
@@ -152,6 +154,27 @@ CHROMIUM_PATH="/path/to/chrome" npm run test:e2e
 ```
 
 > 注意：Chrome 137+ 的官方发行版移除了 `--load-extension` 命令行开关，端到端测试请用 Playwright 的 Chromium（Chrome for Testing）或 `channel: chromium`，不要用系统安装的 Google Chrome。
+
+## CI 与发布
+
+- **CI**（`.github/workflows/ci.yml`）：push `main` / PR 时跑语法检查、单元测试，以及真实 Chromium + 假 LLM 的端到端测试。
+- **Release**（`.github/workflows/release.yml`）：push `v*` tag 时跑同一套测试，打包扩展 zip，创建 GitHub Release，附件包含 `llm-page-translator-v<version>.zip` 与 `.sha256`。
+
+发布新版本：
+
+```bash
+# 1. 修改 manifest.json 里的 version
+# 2. 提交后打同名 tag（tag 与 manifest 不一致时工作流会失败）
+git tag v0.1.1
+git push origin v0.1.1
+```
+
+本地打包（不依赖 CI）：
+
+```bash
+node scripts/package.mjs
+# 产物：dist/llm-page-translator-v0.1.0.zip，仅含 manifest.json / src / icons / README
+```
 
 ## 已知限制
 

@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: 测试 + 打包 + 发布
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+
+      - name: 打包 zip（校验 tag 与 manifest 版本一致）
+        run: node scripts/package.mjs --expect-version="$GITHUB_REF_NAME"
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-zip-${{ github.ref_name }}
+          path: dist/*
+          if-no-files-found: error
+
+      - name: 创建 GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: LLM 网页翻译 ${{ github.ref_name }}
+          files: |
+            dist/*.zip
+            dist/*.zip.sha256
+          body: |
+            ## 安装
+
+            1. 下载下方 zip 并解压到一个固定目录（解压后应能直接看到 `manifest.json`）。
+            2. 打开 `chrome://extensions`，开启右上角「开发者模式」。
+            3. 点击「加载已解压的扩展程序」，选择解压后的目录。
+            4. 首次安装会自动打开设置页，填写 LLM 的 endpoint / API Key / 模型 ID。
+
+            ## 本次更新
+
+            见仓库提交记录；完整说明见 [README](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/README.md)。
+
+            ## 校验
+
+            附件中的 `.sha256` 可用于校验 zip：
+
+            ```bash
+            shasum -a 256 -c llm-page-translator-*.zip.sha256
+            ```
+
+            > 版本号与 `manifest.json` 的 `version` 一致；tag 不一致时工作流会直接失败。
